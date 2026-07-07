@@ -15,15 +15,15 @@ A Create Addon for NeoForge 1.21.1 that adds *playable board games!*
 - Alpha 5.6 - Checkmate/Stalemate
 
 ## Requirements
-Minecraft 1.21.1
-NeoForge Mod Loader
-Create >=6.0.1
+-Minecraft 1.21.1
+-NeoForge Mod Loader
+-Create >=6.0.1
 
 ## Want to build it yourself?
 1. Install JDK 21
 2. Install Source code of repo
 3. In terminal enter the folder and run:
 gradlew.bat build for Windows
-./gradlew build for Linux/MacOS (if types Permission denied then run chmod +x gradlew build)
+./gradlew build for Linux/MacOS (if types Permission denied then run chmod +x gradlew)
 
 
