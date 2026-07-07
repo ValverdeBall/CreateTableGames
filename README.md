@@ -15,9 +15,9 @@ A Create Addon for NeoForge 1.21.1 that adds *playable board games!*
 - Alpha 5.6 - Checkmate/Stalemate
 
 ## Requirements
--Minecraft 1.21.1
--NeoForge Mod Loader
--Create >=6.0.1
+- Minecraft 1.21.1
+- NeoForge Mod Loader
+- Create >=6.0.1
 
 ## Want to build it yourself?
 1. Install JDK 21
