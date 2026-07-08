@@ -29,7 +29,7 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
     this.addRenderableWidget(Button.builder(
       Component.translatable("gui.createtablegames.chess_table.white"), 
       button -> {
-        PacketDistributor.sendToServer(new FactionSelectPayload(PlayerFaction.Side.WHITE));
+        PacketDistributor.sendToServer(new FactionSelectPayload(PlayerFaction.Side.WHITE, this.menu.getBlockPos()));
         if (this.minecraft.player != null) {
           this.minecraft.player.closeContainer();
         }
@@ -41,7 +41,7 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
     this.addRenderableWidget(Button.builder(
       Component.translatable("gui.createtablegames.chess_table.black"),
       button -> {
-        PacketDistributor.sendToServer(new FactionSelectPayload(PlayerFaction.Side.BLACK));
+        PacketDistributor.sendToServer(new FactionSelectPayload(PlayerFaction.Side.BLACK, this.menu.getBlockPos()));
         if (this.minecraft.player != null) {
           this.minecraft.player.closeContainer();
         }

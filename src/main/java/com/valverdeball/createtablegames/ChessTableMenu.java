@@ -25,4 +25,8 @@ public class ChessTableMenu extends AbstractContainerMenu {
   public boolean stillValid(Player player) {
     return true;
   }
+
+  public BlockPos getBlockPos() {
+    return this.tablePos;
+  }
 }
