@@ -60,6 +60,50 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
 
   @Override
   protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-    
+    if (this.minecraft == null || this.minecraft.level == null) {
+      return;
+    }
+
+    net.minecraft.world.level.block.entity.BlockEntity be =
+      this.minecraft.level.getBlockEntity(this.menu.getBlockPos());
+
+    if (!(be instanceof ChessTableBlockEntity chessTable)) {
+      return;
+    }
+
+    int squareSize = 16;
+    int boardOriginX = this.leftPos + (this.imageWidth / 2) - (squareSize * 4);
+    int boardOriginY = this.topPos + 10;
+
+    for (int rank = 0; rank < 8; rank++) {
+      for (int file = 0; file < 8; file++) {
+        int x = boardOriginX + (file *squareSize);
+        int y = boardOriginY + ((7 - rank) * squareSize);
+
+        boolean isLightSquare = (file + rank) % 2 == 0;
+        int color = isLightSquare ? 0xFFEEEED2 : 0xFF769656;
+
+        guiGraphics.fill(x, y, x + squareSize, y + squareSize, color);
+
+        byte square = chessTable.getSquare(file, rank);
+        if (!ChessPiece.isEmpty(square)) {
+          String letter = pieceLetter(square);
+          guiGraphics.drawCenteredString(this.font, letter, x + (squareSize / 2), y + 4, 0xFF000000);
+        }
+      }
+    }
+  }
+
+  private String pieceLetter(byte square) {
+    String letter = switch (ChessPiece.type(square)) {
+      case ChessPiece.PAWN -> "P";
+      case ChessPiece.KNIGHT -> "N";
+      case ChessPiece.BISHOP -> "B";
+      case ChessPiece.ROOK -> "R";
+      case ChessPiece.QUEEN -> "Q";
+      case ChessPiece.KING -> "K";
+      default -> "";
+    };
+    return ChessPiece.isWhite(square) ? letter : letter.toLowerCase();
   }
 }
