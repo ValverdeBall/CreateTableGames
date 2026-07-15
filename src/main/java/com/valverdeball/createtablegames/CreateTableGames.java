@@ -39,5 +39,6 @@ import java.util.function.Supplier;
     private void registerNetwork(final RegisterPayloadHandlersEvent event) {
       final PayloadRegistrar registrar = event.registrar("1.0.0");
       registrar.playToServer(FactionSelectPayload.TYPE, FactionSelectPayload.CODEC, FactionSelectPayload::handle);
+      registrar.playToServer(ChessMovePayload.TYPE, ChessMovePayload.CODEC, ChessMovePayload::handle);
     }
   }

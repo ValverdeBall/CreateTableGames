@@ -8,12 +8,21 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.UUID;
+import java.util.List;
+
 public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
+
+  private Button whiteButton;
+    private Button blackButton;
+
+  private int selectedFile = -1;
+    private int selectedRank = -1;
 
   public ChessTableScreen(ChessTableMenu menu, Inventory inventory, Component title) {
     super (menu, inventory, title);
     this.imageWidth=176;
-    this.imageHeight=166;
+    this.imageHeight=190;
   }
 
   @Override
@@ -24,9 +33,9 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
     int buttonHeight = 20;
 
     int xPos = this.leftPos + (this.imageWidth / 2) - (buttonWidth + 5);
-    int yPos = this.topPos + 40;
+    int yPos = this.topPos + 148;
 
-    this.addRenderableWidget(Button.builder(
+    this.whiteButton = this.addRenderableWidget(Button.builder(
       Component.translatable("gui.createtablegames.chess_table.white"), 
       button -> {
         PacketDistributor.sendToServer(new FactionSelectPayload(PlayerFaction.Side.WHITE, this.menu.getBlockPos()));
@@ -38,7 +47,7 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
       .build()
     );
 
-    this.addRenderableWidget(Button.builder(
+    this.blackButton = this.addRenderableWidget(Button.builder(
       Component.translatable("gui.createtablegames.chess_table.black"),
       button -> {
         PacketDistributor.sendToServer(new FactionSelectPayload(PlayerFaction.Side.BLACK, this.menu.getBlockPos()));
@@ -71,9 +80,18 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
       return;
     }
 
+    this.whiteButton.visible = chessTable.getWhitePlayer() == null;
+    this.whiteButton.active = chessTable.getWhitePlayer() == null;
+    this.blackButton.visible = chessTable.getBlackPlayer() == null;
+    this.blackButton.active = chessTable.getBlackPlayer() == null;
+
     int squareSize = 16;
     int boardOriginX = this.leftPos + (this.imageWidth / 2) - (squareSize * 4);
     int boardOriginY = this.topPos + 10;
+
+    List<int[]> legalMoves = (this.selectedFile != -1)
+      ? ChessMoves.movesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank)
+      : new java.util.ArrayList<>();
 
     for (int rank = 0; rank < 8; rank++) {
       for (int file = 0; file < 8; file++) {
@@ -85,14 +103,92 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
 
         guiGraphics.fill(x, y, x + squareSize, y + squareSize, color);
 
+        if (file == this.selectedFile && rank == this.selectedRank) {
+          guiGraphics.fill(x, y, x + squareSize, y + squareSize, 0x80FFFF00);
+        } else {
+          for (int[] move : legalMoves) {
+            if (move[0] == file && move[1] == rank) {
+              guiGraphics.fill(x, y, x + squareSize, y + squareSize, 0x8000FF00);
+            }
+          }
+        }
+
         byte square = chessTable.getSquare(file, rank);
         if (!ChessPiece.isEmpty(square)) {
           String letter = pieceLetter(square);
-          guiGraphics.drawCenteredString(this.font, letter, x + (squareSize / 2), y + 4, 0xFF000000);
+          int textColor = ChessPiece.isWhite(square) ? 0xFFFFFFFF : 0xFF000000;
+          guiGraphics.drawCenteredString(this.font, letter, x + (squareSize / 2), y + 4, textColor);
         }
       }
     }
   }
+
+  @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+      if (button == 0 && this.minecraft != null && this.minecraft.level != null) {
+        net.minecraft.world.level.block.entity.BlockEntity be = 
+          this.minecraft.level.getBlockEntity(this.menu.getBlockPos());
+
+        if (be instanceof ChessTableBlockEntity chessTable) {
+          int squareSize = 16;
+          int boardOriginX = this.leftPos + (this.imageWidth / 2) - (squareSize * 4);
+          int boardOriginY = this.topPos + 10;
+
+          int clickedFile = (int) ((mouseX - boardOriginX) / squareSize);
+          int clickedRow = (int) ((mouseY - boardOriginY) / squareSize);
+
+          if (clickedFile >= 0 && clickedFile < 8 && clickedRow >= 0 && clickedRow < 8) {
+            int clickedRank = 7 - clickedRow;
+            handleSquareClick(chessTable, clickedFile, clickedRank);
+            return true;
+          }
+        }
+      }
+      return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+  private void handleSquareClick(ChessTableBlockEntity chessTable, int file, int rank) {
+    if (this.minecraft == null || this.minecraft.player == null) return;
+
+    UUID localUUID = this.minecraft.player.getUUID();
+    PlayerFaction.Side localSide;
+
+    if (localUUID.equals(chessTable.getWhitePlayer())) {
+      localSide = PlayerFaction.Side.WHITE;
+    } else if (localUUID.equals(chessTable.getBlackPlayer())) {
+      localSide = PlayerFaction.Side.BLACK;
+    } else {
+      localSide = PlayerFaction.Side.NONE;
+    }
+
+    if (localSide == PlayerFaction.Side.NONE) {
+      return;
+    }
+
+    if (this.selectedFile == -1) {
+      byte square = chessTable.getSquare(file, rank);
+      if (!ChessPiece.isEmpty(square) && ChessPiece.sideOf(square) == localSide) {
+        this.selectedFile = file;
+        this.selectedRank = rank;
+      }
+      return;
+    }
+      List<int[]> legalMoves = ChessMoves.movesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank);
+      boolean isLegal = false;
+      for (int[] move : legalMoves) {
+        if (move[0] == file && move[1] == rank) {
+          isLegal = true;
+          break;
+        }
+      }
+
+      if (isLegal) {
+        PacketDistributor.sendToServer(new ChessMovePayload(this.menu.getBlockPos(), this.selectedFile, this.selectedRank, file, rank));
+      }
+
+      this.selectedFile = -1;
+      this.selectedRank = -1;
+    }
 
   private String pieceLetter(byte square) {
     String letter = switch (ChessPiece.type(square)) {

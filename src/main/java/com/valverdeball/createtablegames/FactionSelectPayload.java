@@ -37,7 +37,9 @@ faction.setSide(payload.chosenSide());
 
         var level = serverPlayer.level();
         if (level.getBlockEntity(payload.pos()) instanceof ChessTableBlockEntity chessTable) {
-          chessTable.assignPlayer(serverPlayer.getUUID(), payload.chosenSide());
+          if (chessTable.assignPlayer(serverPlayer.getUUID(), payload.chosenSide())) {
+            faction.setSide(payload.chosenSide());
+          }
         }
       }
     });

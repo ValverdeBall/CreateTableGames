@@ -41,13 +41,20 @@ public class ChessTableBlockEntity extends KineticBlockEntity implements MenuPro
     setupInitialBoard();
   }
 
-  public void assignPlayer(UUID playerUUID, PlayerFaction.Side side) {
+  public boolean assignPlayer(UUID playerUUID, PlayerFaction.Side side) {
     if (side == PlayerFaction.Side.WHITE) {
+      if (this.whitePlayer != null && !this.whitePlayer.equals(playerUUID)) {
+        return false;
+      }
       this.whitePlayer = playerUUID;
     } else if (side == PlayerFaction.Side.BLACK) {
+      if (this.blackPlayer != null && !this.blackPlayer.equals(playerUUID)) {
+        return false;
+      }
       this.blackPlayer = playerUUID;
     }
-    this.setChanged();
+    this.notifyUpdate();
+    return true;
   }
 
   private void setupInitialBoard() {
@@ -79,7 +86,7 @@ public class ChessTableBlockEntity extends KineticBlockEntity implements MenuPro
 
   public void setSquare(int file, int rank, byte piece) {
     board[index(file, rank)] = piece;
-    this.setChanged();
+    this.notifyUpdate();
   }
 
   public byte[] getBoard() {
