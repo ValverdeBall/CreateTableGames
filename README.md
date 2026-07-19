@@ -10,8 +10,8 @@ A Create Addon for NeoForge 1.21.1 that adds *playable board games!*
 - Alpha 5.1 - Side selection - Done
 - Alpha 5.2 - Board data structure - Done
 - Alpha 5.3 - Piece movements - Done
-- Alpha 5.4 - Check detection - WIP
-- Alpha 5.5 - Special moves
+- Alpha 5.4 - Check detection - Done
+- Alpha 5.5 - Special moves - WIP
 - Alpha 5.6 - Checkmate/Stalemate
 
 ## Requirements
