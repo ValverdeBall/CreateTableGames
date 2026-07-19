@@ -60,7 +60,7 @@ public record ChessMovePayload(BlockPos pos, int fromFile, int fromRank, int toF
             return;
           }
 
-          List<int[]> legalMoves = ChessMoves.movesFor(chessTable.getBoard(), payload.fromFile(), payload.fromRank());
+          List<int[]> legalMoves = ChessMoves.legalMovesFor(chessTable.getBoard(), payload.fromFile(), payload.fromRank());
           boolean isLegal = false;
           for (int[] move : legalMoves) {
             if (move[0] == payload.toFile() && move[1] == payload.toRank()) {

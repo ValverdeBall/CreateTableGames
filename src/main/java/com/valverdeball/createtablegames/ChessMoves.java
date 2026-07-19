@@ -125,6 +125,66 @@ public final class ChessMoves{
     return ChessPiece.sideOf(square) == side;
   }
 
+  public static boolean isKingInCheck(byte [] board, PlayerFaction.Side side) {
+    int kingFile = -1;
+    int kingRank = -1;
+    byte kingPiece = ChessPiece.encode(ChessPiece.KING, side);
+
+    for (int rank = 0; rank < 8; rank++) {
+      for (int file = 0; file < 8; file++) {
+        if (board[rank * 8 + file] == kingPiece) {
+          kingFile = file;
+          kingRank = rank;
+        }
+      }
+    }
+
+    if (kingFile == -1) {
+      return false;
+    }
+
+    for (int rank = 0; rank < 8; rank++) {
+      for (int file = 0; file < 8; file++) {
+        byte square = board[rank * 8 + file];
+        if (ChessPiece.isEmpty(square) || ChessPiece.sideOf(square) == side) {
+          continue;
+        }
+
+        List<int[]> attackerMoves = movesFor(board, file, rank);
+        for (int[] move : attackerMoves) {
+          if (move[0] == kingFile && move[1] == kingRank) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public static List<int[]> legalMovesFor(byte[] board, int file, int rank) {
+    byte piece = board[rank * 8 + file];
+    if (ChessPiece.isEmpty(piece)) {
+      return new ArrayList<>();
+    }
+
+    PlayerFaction.Side side = ChessPiece.sideOf(piece);
+    List<int[]> rawMoves = movesFor(board, file, rank);
+    List<int[]> legalMoves = new ArrayList<>();
+
+    for (int[] move : rawMoves) {
+      byte[] simulated = board.clone();
+      simulated[rank * 8 + file] = ChessPiece.EMPTY;
+      simulated[move[1] * 8 + move[0]] = piece;
+
+      if (!isKingInCheck(simulated, side)) {
+        legalMoves.add(move);
+      }
+    }
+
+    return legalMoves;
+  }
+
   public static List<int[]> movesFor(byte[] board, int file, int rank) {
     byte square = board[rank * 8 + file];
     if (ChessPiece.isEmpty(square)) return new ArrayList<>();

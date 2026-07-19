@@ -90,7 +90,7 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
     int boardOriginY = this.topPos + 10;
 
     List<int[]> legalMoves = (this.selectedFile != -1)
-      ? ChessMoves.movesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank)
+      ? ChessMoves.legalMovesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank)
       : new java.util.ArrayList<>();
 
     for (int rank = 0; rank < 8; rank++) {
@@ -173,7 +173,7 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
       }
       return;
     }
-      List<int[]> legalMoves = ChessMoves.movesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank);
+      List<int[]> legalMoves = ChessMoves.legalMovesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank);
       boolean isLegal = false;
       for (int[] move : legalMoves) {
         if (move[0] == file && move[1] == rank) {
