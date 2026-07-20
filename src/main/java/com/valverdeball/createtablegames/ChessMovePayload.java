@@ -60,7 +60,10 @@ public record ChessMovePayload(BlockPos pos, int fromFile, int fromRank, int toF
             return;
           }
 
-          List<int[]> legalMoves = ChessMoves.legalMovesFor(chessTable.getBoard(), payload.fromFile(), payload.fromRank());
+          List<int[]> legalMoves = ChessMoves.legalMovesFor(
+            chessTable.getBoard(), payload.fromFile(), payload.fromRank(),
+            chessTable.canCastleKingside(side), chessTable.canCastleQueenside(side)
+          );
           boolean isLegal = false;
           for (int[] move : legalMoves) {
             if (move[0] == payload.toFile() && move[1] == payload.toRank()) {
@@ -69,9 +72,37 @@ public record ChessMovePayload(BlockPos pos, int fromFile, int fromRank, int toF
             }
           }
 
-          if (isLegal) {
-            chessTable.setSquare(payload.toFile(), payload.toRank(), piece);
-            chessTable.setSquare(payload.fromFile(), payload.fromRank(), ChessPiece.EMPTY);
+          if (!isLegal) {
+            return;
+          }
+
+          byte type = ChessPiece.type(piece);
+          int fileDelta = payload.toFile() - payload.fromFile();
+
+          if (type == ChessPiece.KING && Math.abs(fileDelta) == 2) {
+            int rookFromFile = fileDelta > 0 ? 7 : 0;
+            int rookToFile = fileDelta > 0 ? payload.fromFile() + 1 : payload.fromFile() - 1;
+            byte rook = chessTable.getSquare(rookFromFile, payload.fromRank());
+            chessTable.setSquare(rookToFile, payload.fromRank(), rook);
+            chessTable.setSquare(rookFromFile, payload.fromRank(), ChessPiece.EMPTY);
+          }
+
+          chessTable.setSquare(payload.toFile(), payload.toRank(), piece);
+          chessTable.setSquare(payload.fromFile(), payload.fromRank(), ChessPiece.EMPTY);
+
+          if (type == ChessPiece.KING) {
+            chessTable.revokeCastleKingside(side);
+            chessTable.revokeCastleQueenside(side);
+          } else if (type == ChessPiece.ROOK) {
+            if (payload.fromFile() == 0) chessTable.revokeCastleQueenside(side);
+            if (payload.fromFile() == 7) chessTable.revokeCastleKingside(side);
+          }
+
+          PlayerFaction.Side enemySide = (side == PlayerFaction.Side.WHITE) ? PlayerFaction.Side.BLACK : PlayerFaction.Side.WHITE;
+          int enemyBackRank = (side == PlayerFaction.Side.WHITE) ? 7 : 0;
+          if (payload.toRank() == enemyBackRank) {
+            if (payload.toFile() == 0) chessTable.revokeCastleQueenside(enemySide);
+            if (payload.toFile() == 7) chessTable.revokeCastleKingside(enemySide);
           }
         }
       }

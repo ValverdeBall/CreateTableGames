@@ -35,6 +35,13 @@ public class ChessTableBlockEntity extends KineticBlockEntity implements MenuPro
   private UUID whitePlayer = null;
   private UUID blackPlayer = null;
 
+  private boolean whiteCanCastleKingside = true;
+  private boolean whiteCanCastleQueenside = true;
+  private boolean blackCanCastleKingside = true;
+  private boolean blackCanCastleQueenside = true;
+
+  private int enPassantFile = -1;
+
   private byte[] board = new byte[64];
 
   {
@@ -105,6 +112,12 @@ public class ChessTableBlockEntity extends KineticBlockEntity implements MenuPro
     }
 
     tag.putByteArray("Board", this.board);
+
+    tag.putBoolean("WhiteCastleK", whiteCanCastleKingside);
+    tag.putBoolean("WhiteCastleQ", whiteCanCastleQueenside);
+    tag.putBoolean("BlackCastleK", blackCanCastleKingside);
+    tag.putBoolean("BlackCastleQ", blackCanCastleQueenside);
+    tag.putInt("EnPassantFile", enPassantFile);
   }
 
   @Override
@@ -133,8 +146,31 @@ public class ChessTableBlockEntity extends KineticBlockEntity implements MenuPro
     } else {
       setupInitialBoard();
     }
+
+    whiteCanCastleKingside = tag.getBoolean("WhiteCastleK");
+    whiteCanCastleQueenside = tag.getBoolean("WhiteCastleQ");
+    blackCanCastleKingside = tag.getBoolean("BlackCastleK");
+    blackCanCastleQueenside = tag.getBoolean("BlackCastleQ");
+    enPassantFile = tag.contains("EnPassantFile") ? tag.getInt("EnPassantFile") : -1;
   }
 
   public UUID getWhitePlayer() { return whitePlayer; }
   public UUID getBlackPlayer() { return blackPlayer; }
+
+  public boolean canCastleKingside(PlayerFaction.Side side) {
+    return side == PlayerFaction.Side.WHITE ? whiteCanCastleKingside : blackCanCastleKingside;
+}
+    public boolean canCastleQueenside(PlayerFaction.Side side) {
+      return side == PlayerFaction.Side.WHITE ? whiteCanCastleQueenside : blackCanCastleQueenside;
+    }
+    public void revokeCastleKingside(PlayerFaction.Side side) {
+      if (side == PlayerFaction.Side.WHITE) whiteCanCastleKingside = false;
+      else blackCanCastleKingside = false;
+    }
+    public void revokeCastleQueenside(PlayerFaction.Side side) {
+      if (side == PlayerFaction.Side.WHITE) whiteCanCastleQueenside = false;
+      else blackCanCastleQueenside = false;
+    }
+    public int getEnPassantFile() { return enPassantFile; }
+    public void setEnPassantFile(int file) { this.enPassantFile = file; }
 }

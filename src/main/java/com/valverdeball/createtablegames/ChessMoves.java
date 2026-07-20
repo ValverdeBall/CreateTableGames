@@ -185,6 +185,62 @@ public final class ChessMoves{
     return legalMoves;
   }
 
+  public static List<int[]> legalMovesFor(byte[] board, int file, int rank, boolean canCastleKingside, boolean canCastleQueenside) {
+    List<int[]> legalMoves = legalMovesFor(board, file, rank);
+
+    byte piece = board[rank * 8 + file];
+    if (!ChessPiece.isEmpty(piece) && ChessPiece.type(piece) == ChessPiece.KING) {
+      PlayerFaction.Side side = ChessPiece.sideOf(piece);
+      legalMoves.addAll(castlingMoves(board, file, rank, side, canCastleKingside, canCastleQueenside));
+    }
+
+    return legalMoves;
+  }
+
+  public static List<int[]> castlingMoves(byte[] board, int file, int rank, PlayerFaction.Side side, boolean canKingside, boolean canQueenside) {
+    List<int[]> moves = new ArrayList<>();
+
+    if(isKingInCheck(board, side)) {
+      return moves;
+    }
+
+    if (canKingside) {
+      if (isEmpty(board, file + 1, rank) && isEmpty(board, file + 2, rank)
+         && !isSquareAttacked(board, file + 1, rank, side)
+         && !isSquareAttacked(board, file + 2, rank, side)) {
+        moves.add(new int[]{file + 2, rank});
+      }
+    }
+
+    if (canQueenside) {
+      if (isEmpty(board, file - 1, rank) && isEmpty(board, file - 2, rank)
+         && !isSquareAttacked(board, file - 1, rank, side)
+         && !isSquareAttacked(board, file - 2, rank, side)) {
+        moves.add(new int[]{file - 2, rank});
+      }
+    }
+
+    return moves;
+  }
+
+  private static boolean isSquareAttacked(byte[] board, int targetFile, int targetRank, PlayerFaction.Side side) {
+    for (int rank = 0; rank < 8; rank++) {
+      for (int file = 0; file < 8; file++) {
+        byte square = board[rank * 8 + file];
+        if (ChessPiece.isEmpty(square) || ChessPiece.sideOf(square) == side) {
+          continue;
+        }
+        List<int[]> attackerMoves = movesFor(board, file, rank);
+        for (int[] move : attackerMoves) {
+          if (move[0] == targetFile && move[1] == targetRank) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   public static List<int[]> movesFor(byte[] board, int file, int rank) {
     byte square = board[rank * 8 + file];
     if (ChessPiece.isEmpty(square)) return new ArrayList<>();

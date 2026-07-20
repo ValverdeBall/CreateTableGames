@@ -89,13 +89,17 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
     int boardOriginX = this.leftPos + (this.imageWidth / 2) - (squareSize * 4);
     int boardOriginY = this.topPos + 10;
 
-    List<int[]> legalMoves = (this.selectedFile != -1)
-      ? ChessMoves.legalMovesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank)
-      : new java.util.ArrayList<>();
+    List<int[]> legalMoves;
+        if (this.selectedFile != -1) {
+          PlayerFaction.Side selectedSide = ChessPiece.sideOf(chessTable.getSquare(this.selectedFile, this.selectedRank));
+          legalMoves = ChessMoves.legalMovesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank, chessTable.canCastleKingside(selectedSide), chessTable.canCastleQueenside(selectedSide));
+        } else {
+          legalMoves = new java.util.ArrayList<>();
+        }
 
     for (int rank = 0; rank < 8; rank++) {
       for (int file = 0; file < 8; file++) {
-        int x = boardOriginX + (file *squareSize);
+        int x = boardOriginX + (file * squareSize);
         int y = boardOriginY + ((7 - rank) * squareSize);
 
         boolean isLightSquare = (file + rank) % 2 == 0;
@@ -173,7 +177,7 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
       }
       return;
     }
-      List<int[]> legalMoves = ChessMoves.legalMovesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank);
+      List<int[]> legalMoves = ChessMoves.legalMovesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank, chessTable.canCastleKingside(localSide), chessTable.canCastleQueenside(localSide));
       boolean isLegal = false;
       for (int[] move : legalMoves) {
         if (move[0] == file && move[1] == rank) {
