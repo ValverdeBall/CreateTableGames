@@ -197,6 +197,22 @@ public final class ChessMoves{
     return legalMoves;
   }
 
+  public static List<int[]> legalMovesFor(byte[] board, int file, int rank, boolean canCastleKingside, boolean canCastleQueenside, int enPassantFile) {
+    List<int[]> legalMoves = legalMovesFor(board, file, rank, canCastleKingside, canCastleQueenside);
+
+    byte piece = board[rank * 8 + file];
+    if (!ChessPiece.isEmpty(piece) && ChessPiece.type(piece) == ChessPiece.PAWN && enPassantFile != -1) {
+      PlayerFaction.Side side = ChessPiece.sideOf(piece);
+      int captureRank = (side == PlayerFaction.Side.WHITE) ? 4 : 3;
+      int targetRank = (side == PlayerFaction.Side.WHITE) ? 5 : 2;
+      if (rank == captureRank && Math.abs(file - enPassantFile) == 1) {
+        legalMoves.add(new int[]{enPassantFile, targetRank});
+      }
+    }
+
+    return legalMoves;
+  }
+
   public static List<int[]> castlingMoves(byte[] board, int file, int rank, PlayerFaction.Side side, boolean canKingside, boolean canQueenside) {
     List<int[]> moves = new ArrayList<>();
 

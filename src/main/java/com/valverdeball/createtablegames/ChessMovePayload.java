@@ -62,7 +62,7 @@ public record ChessMovePayload(BlockPos pos, int fromFile, int fromRank, int toF
 
           List<int[]> legalMoves = ChessMoves.legalMovesFor(
             chessTable.getBoard(), payload.fromFile(), payload.fromRank(),
-            chessTable.canCastleKingside(side), chessTable.canCastleQueenside(side)
+            chessTable.canCastleKingside(side), chessTable.canCastleQueenside(side), chessTable.getEnPassantFile()
           );
           boolean isLegal = false;
           for (int[] move : legalMoves) {
@@ -87,6 +87,11 @@ public record ChessMovePayload(BlockPos pos, int fromFile, int fromRank, int toF
             chessTable.setSquare(rookFromFile, payload.fromRank(), ChessPiece.EMPTY);
           }
 
+          if (type == ChessPiece.PAWN && payload.toFile() != payload.fromFile()
+             && ChessPiece.isEmpty(chessTable.getSquare(payload.toFile(), payload.toRank()))) {
+            chessTable.setSquare(payload.toFile(), payload.fromRank(), ChessPiece.EMPTY);
+             }
+          
           chessTable.setSquare(payload.toFile(), payload.toRank(), piece);
           chessTable.setSquare(payload.fromFile(), payload.fromRank(), ChessPiece.EMPTY);
 
@@ -103,6 +108,12 @@ public record ChessMovePayload(BlockPos pos, int fromFile, int fromRank, int toF
           if (payload.toRank() == enemyBackRank) {
             if (payload.toFile() == 0) chessTable.revokeCastleQueenside(enemySide);
             if (payload.toFile() == 7) chessTable.revokeCastleKingside(enemySide);
+          }
+
+          if (type == ChessPiece.PAWN && Math.abs(payload.toRank() - payload.fromRank()) == 2) {
+        chessTable.setEnPassantFile(payload.fromFile());
+      } else {
+        chessTable.setEnPassantFile(-1);
           }
         }
       }

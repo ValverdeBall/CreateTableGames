@@ -92,7 +92,7 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
     List<int[]> legalMoves;
         if (this.selectedFile != -1) {
           PlayerFaction.Side selectedSide = ChessPiece.sideOf(chessTable.getSquare(this.selectedFile, this.selectedRank));
-          legalMoves = ChessMoves.legalMovesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank, chessTable.canCastleKingside(selectedSide), chessTable.canCastleQueenside(selectedSide));
+          legalMoves = ChessMoves.legalMovesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank, chessTable.canCastleKingside(selectedSide), chessTable.canCastleQueenside(selectedSide),chessTable.getEnPassantFile());
         } else {
           legalMoves = new java.util.ArrayList<>();
         }
@@ -177,7 +177,7 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
       }
       return;
     }
-      List<int[]> legalMoves = ChessMoves.legalMovesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank, chessTable.canCastleKingside(localSide), chessTable.canCastleQueenside(localSide));
+      List<int[]> legalMoves = ChessMoves.legalMovesFor(chessTable.getBoard(), this.selectedFile, this.selectedRank, chessTable.canCastleKingside(localSide), chessTable.canCastleQueenside(localSide), chessTable.getEnPassantFile());
       boolean isLegal = false;
       for (int[] move : legalMoves) {
         if (move[0] == file && move[1] == rank) {
