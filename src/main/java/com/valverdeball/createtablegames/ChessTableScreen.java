@@ -15,6 +15,10 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
 
   private Button whiteButton;
     private Button blackButton;
+    private Button queenButton;
+    private Button rookButton;
+    private Button bishopButton;
+    private Button knightButton;
 
   private int selectedFile = -1;
     private int selectedRank = -1;
@@ -58,6 +62,31 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
       .bounds(xPos + buttonWidth + 10, yPos, buttonWidth, buttonHeight)
       .build()
     );
+
+    int promoButtonWidth = 50;
+        int promoButtonHeight = 20;
+        int promoY = this.topPos + 148;
+        int promoStartX = this.leftPos + (this.imageWidth / 2) - ((promoButtonWidth * 4 + 15) / 2);
+
+        this.queenButton = this.addRenderableWidget(Button.builder(
+          Component.translatable("gui.createtablegames.chess_table.queen"),
+          button -> promote(ChessPiece.QUEEN)).bounds(promoStartX, promoY, promoButtonWidth, promoButtonHeight).build()
+        );
+    
+        this.rookButton = this.addRenderableWidget(Button.builder(
+          Component.translatable("gui.createtablegames.chess_table.rook"),
+          button -> promote(ChessPiece.ROOK)).bounds(promoStartX, promoY, promoButtonWidth, promoButtonHeight).build()
+        );
+    
+        this.bishopButton = this.addRenderableWidget(Button.builder(
+          Component.translatable("gui.createtablegames.chess_table.bishop"),
+          button -> promote(ChessPiece.BISHOP)).bounds(promoStartX, promoY, promoButtonWidth, promoButtonHeight).build()
+        );
+    
+        this.knightButton = this.addRenderableWidget(Button.builder(
+          Component.translatable("gui.createtablegames.chess_table.knight"),
+          button -> promote(ChessPiece.KNIGHT)).bounds(promoStartX, promoY, promoButtonWidth, promoButtonHeight).build()
+        );
   }
 
   @Override
@@ -84,6 +113,17 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
     this.whiteButton.active = chessTable.getWhitePlayer() == null;
     this.blackButton.visible = chessTable.getBlackPlayer() == null;
     this.blackButton.active = chessTable.getBlackPlayer() == null;
+
+    boolean hasPendingPromotion = chessTable.getPendingPromotionFile() != -1 && ChessPiece.sideOf(chessTable.getSquare(chessTable.getPendingPromotionFile(), chessTable.getPendingPromotionRank())) == getLocalSide(chessTable);
+
+    this.queenButton.visible = hasPendingPromotion;
+    this.queenButton.active = hasPendingPromotion;
+    this.rookButton.visible = hasPendingPromotion;
+    this.rookButton.active = hasPendingPromotion;
+    this.bishopButton.visible = hasPendingPromotion;
+    this.bishopButton.active = hasPendingPromotion;
+    this.knightButton.visible = hasPendingPromotion;
+    this.knightButton.active = hasPendingPromotion;
 
     int squareSize = 16;
     int boardOriginX = this.leftPos + (this.imageWidth / 2) - (squareSize * 4);
@@ -153,6 +193,7 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
 
   private void handleSquareClick(ChessTableBlockEntity chessTable, int file, int rank) {
     if (this.minecraft == null || this.minecraft.player == null) return;
+    if (chessTable.getPendingPromotionFile() != -1) return;
 
     UUID localUUID = this.minecraft.player.getUUID();
     PlayerFaction.Side localSide;
@@ -205,5 +246,17 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
       default -> "";
     };
     return ChessPiece.isWhite(square) ? letter : letter.toLowerCase();
+  }
+
+  private void promote(byte pieceType) {
+    PacketDistributor.sendToServer(new ChessPromotionPayload(this.menu.getBlockPos(), pieceType));
+  }
+
+  private PlayerFaction.Side getLocalSide(ChessTableBlockEntity chessTable) {
+    if (this.minecraft == null || this.minecraft.player == null) return PlayerFaction.Side.NONE;
+    UUID localUUID = this.minecraft.player.getUUID();
+    if (localUUID.equals(chessTable.getWhitePlayer())) return PlayerFaction.Side.WHITE;
+    if (localUUID.equals(chessTable.getBlackPlayer())) return PlayerFaction.Side.BLACK;
+    return PlayerFaction.Side.NONE;
   }
 }

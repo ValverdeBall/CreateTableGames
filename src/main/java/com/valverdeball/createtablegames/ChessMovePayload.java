@@ -55,6 +55,10 @@ public record ChessMovePayload(BlockPos pos, int fromFile, int fromRank, int toF
             return;
           }
 
+          if (chessTable.getPendingPromotionFile() != -1) {
+            return;
+          }
+
           byte piece = chessTable.getSquare(payload.fromFile(), payload.fromRank());
           if (ChessPiece.isEmpty(piece) || ChessPiece.sideOf(piece) != side) {
             return;
@@ -95,6 +99,11 @@ public record ChessMovePayload(BlockPos pos, int fromFile, int fromRank, int toF
           chessTable.setSquare(payload.toFile(), payload.toRank(), piece);
           chessTable.setSquare(payload.fromFile(), payload.fromRank(), ChessPiece.EMPTY);
 
+          int promotionRank = (side == PlayerFaction.Side.WHITE) ? 7 : 0;
+          if (type == ChessPiece.PAWN && payload.toRank() == promotionRank) {
+            chessTable.setPendingPromotion(payload.toFile(), payload.toRank());
+          }
+
           if (type == ChessPiece.KING) {
             chessTable.revokeCastleKingside(side);
             chessTable.revokeCastleQueenside(side);
@@ -115,6 +124,8 @@ public record ChessMovePayload(BlockPos pos, int fromFile, int fromRank, int toF
       } else {
         chessTable.setEnPassantFile(-1);
           }
+
+          chessTable.notifyUpdate();
         }
       }
     });

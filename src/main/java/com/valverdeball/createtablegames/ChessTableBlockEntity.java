@@ -42,6 +42,9 @@ public class ChessTableBlockEntity extends KineticBlockEntity implements MenuPro
 
   private int enPassantFile = -1;
 
+  private int pendingPromotionFile = -1;
+  private int pendingPromotionRank = -1;
+
   private byte[] board = new byte[64];
 
   {
@@ -49,6 +52,11 @@ public class ChessTableBlockEntity extends KineticBlockEntity implements MenuPro
   }
 
   public boolean assignPlayer(UUID playerUUID, PlayerFaction.Side side) {
+
+    if (playerUUID.equals(whitePlayer) || playerUUID.equals(blackPlayer)) {
+      return false;
+    }
+    
     if (side == PlayerFaction.Side.WHITE) {
       if (this.whitePlayer != null && !this.whitePlayer.equals(playerUUID)) {
         return false;
@@ -117,7 +125,11 @@ public class ChessTableBlockEntity extends KineticBlockEntity implements MenuPro
     tag.putBoolean("WhiteCastleQ", whiteCanCastleQueenside);
     tag.putBoolean("BlackCastleK", blackCanCastleKingside);
     tag.putBoolean("BlackCastleQ", blackCanCastleQueenside);
+    
     tag.putInt("EnPassantFile", enPassantFile);
+
+    tag.putInt("PendingPromotionFile", pendingPromotionFile);
+    tag.putInt("PendingPromotionRank", pendingPromotionRank);
   }
 
   @Override
@@ -151,7 +163,11 @@ public class ChessTableBlockEntity extends KineticBlockEntity implements MenuPro
     whiteCanCastleQueenside = tag.getBoolean("WhiteCastleQ");
     blackCanCastleKingside = tag.getBoolean("BlackCastleK");
     blackCanCastleQueenside = tag.getBoolean("BlackCastleQ");
+    
     enPassantFile = tag.contains("EnPassantFile") ? tag.getInt("EnPassantFile") : -1;
+
+    pendingPromotionFile = tag.contains("PendingPromotionFile") ? tag.getInt("PendingPromotionFile") : -1;
+    pendingPromotionRank = tag.contains("PendingPromotionRank") ? tag.getInt("PendingPromotionRank") : -1;
   }
 
   public UUID getWhitePlayer() { return whitePlayer; }
@@ -173,4 +189,17 @@ public class ChessTableBlockEntity extends KineticBlockEntity implements MenuPro
     }
     public int getEnPassantFile() { return enPassantFile; }
     public void setEnPassantFile(int file) { this.enPassantFile = file; }
+
+  public int getPendingPromotionFile() { return pendingPromotionFile; }
+  public int getPendingPromotionRank() { return pendingPromotionRank; }
+  public void setPendingPromotion(int file, int rank) {
+    this.pendingPromotionFile = file;
+    this.pendingPromotionRank = rank;
+    this.notifyUpdate();
+  }
+  public void clearPendingPromotion() {
+    this.pendingPromotionFile = -1;
+    this.pendingPromotionRank = -1;
+    this.notifyUpdate();
+  }
 }

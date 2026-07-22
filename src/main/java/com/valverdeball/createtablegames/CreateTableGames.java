@@ -40,5 +40,6 @@ import java.util.function.Supplier;
       final PayloadRegistrar registrar = event.registrar("1.0.0");
       registrar.playToServer(FactionSelectPayload.TYPE, FactionSelectPayload.CODEC, FactionSelectPayload::handle);
       registrar.playToServer(ChessMovePayload.TYPE, ChessMovePayload.CODEC, ChessMovePayload::handle);
+      registrar.playToServer(ChessPromotionPayload.TYPE, ChessPromotionPayload.CODEC, ChessPromotionPayload::handle);
     }
   }
