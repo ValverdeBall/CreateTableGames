@@ -75,17 +75,17 @@ public class ChessTableScreen extends AbstractContainerScreen<ChessTableMenu> {
     
         this.rookButton = this.addRenderableWidget(Button.builder(
           Component.translatable("gui.createtablegames.chess_table.rook"),
-          button -> promote(ChessPiece.ROOK)).bounds(promoStartX, promoY, promoButtonWidth, promoButtonHeight).build()
+          button -> promote(ChessPiece.ROOK)).bounds(promoStartX + (promoButtonWidth + 5) , promoY,         promoButtonWidth, promoButtonHeight).build()
         );
     
         this.bishopButton = this.addRenderableWidget(Button.builder(
           Component.translatable("gui.createtablegames.chess_table.bishop"),
-          button -> promote(ChessPiece.BISHOP)).bounds(promoStartX, promoY, promoButtonWidth, promoButtonHeight).build()
+          button -> promote(ChessPiece.BISHOP)).bounds(promoStartX + (promoButtonWidth + 5) * 2, promoY, promoButtonWidth, promoButtonHeight).build()
         );
     
         this.knightButton = this.addRenderableWidget(Button.builder(
           Component.translatable("gui.createtablegames.chess_table.knight"),
-          button -> promote(ChessPiece.KNIGHT)).bounds(promoStartX, promoY, promoButtonWidth, promoButtonHeight).build()
+          button -> promote(ChessPiece.KNIGHT)).bounds(promoStartX + (promoButtonWidth + 5) * 3, promoY, promoButtonWidth, promoButtonHeight).build()
         );
   }
 

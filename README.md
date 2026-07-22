@@ -11,8 +11,8 @@ A Create Addon for NeoForge 1.21.1 that adds *playable board games!*
 - Alpha 5.2 - Board data structure - Done
 - Alpha 5.3 - Piece movements - Done
 - Alpha 5.4 - Check detection - Done
-- Alpha 5.5 - Special moves - WIP
-- Alpha 5.6 - Checkmate/Stalemate
+- Alpha 5.5 - Special moves - Done
+- Alpha 5.6 - Checkmate/Stalemate - WIP
 
 ## Requirements
 - Minecraft 1.21.1
